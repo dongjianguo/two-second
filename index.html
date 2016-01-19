@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>你能准确按出2秒吗?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="assets/css/main.css"/>
+</head>
+<body>
+
+<a href="javascript:void(0);" class="circle" id="J_Anchor">长按后松开</a>
+
+<script>
+  (function () {
+    //判断浏览器类型为手机或者电脑
+    function isMobile() {
+      var sUserAgent = navigator.userAgent.toLowerCase(),
+        bIsIpad = sUserAgent.match(/ipad/i) == "ipad",
+        bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os",
+        bIsMidp = sUserAgent.match(/midp/i) == "midp",
+        bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4",
+        bIsUc = sUserAgent.match(/ucweb/i) == "ucweb",
+        bIsAndroid = sUserAgent.match(/android/i) == "android",
+        bIsCE = sUserAgent.match(/windows ce/i) == "windows ce",
+        bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
+      return (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM);
+    }
+
+    //定义事件变量
+    var touchStart = isMobile() ? 'touchstart' : 'mousedown';
+    var touchEnd = isMobile() ? 'touchend' : 'mouseup';
+
+    //定义数据名称以及类型
+    var body = document.querySelector('body'),
+      anchor = document.querySelector('#J_Anchor'),
+      start = {},
+      end = {},
+      left = {
+        seconds: 0,
+        milliseconds: 0,
+        timestamp: 0,
+        percentage: 0,
+        target: 2000
+      };
+
+    //阻止浏览器原生的长按弹出菜单事件(重要,影响游戏)
+    body.addEventListener(touchStart, function (e) {
+      e.preventDefault();
+    }, false);
+
+    //添加触摸开始监控,并记录时间数据
+    anchor.addEventListener(touchStart, function () {
+      start = getTime();
+    }, false);
+
+    //添加触摸结束监控,并记录时间数据,计算并返回所用时间
+    anchor.addEventListener(touchEnd, function () {
+      end = getTime();
+      left.seconds = end.seconds - start.seconds;
+      left.milliseconds = end.milliseconds - start.milliseconds;
+      left.timestamp = end.timestamp - start.timestamp;
+      if (left.seconds < 0) {
+        left.seconds = 60 + left.seconds;
+      }
+      if (left.milliseconds < 0) {
+        left.milliseconds = left.milliseconds + 1000;
+        left.seconds = left.seconds - 1;
+      }
+      var absNum = left.timestamp - left.target;
+      left.percentage = 100 - (Math.abs(absNum) / 100).toFixed(2);
+      alert('你按出了' + left.seconds + '秒' + left.milliseconds + '毫秒' + ',击败了全国' + left.percentage + '%的人');
+    }, false);
+
+    //记录时间函数
+    function getTime() {
+      var time = new Date(),
+        seconds = time.getSeconds(),
+        milliseconds = time.getMilliseconds(),
+        timestamp = time.getTime();
+
+      return {
+        seconds: seconds,
+        milliseconds: milliseconds,
+        timestamp: timestamp
+      }
+    }
+  })();
+</script>
+</body>
+</html>
